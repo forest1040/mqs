@@ -3,6 +3,7 @@
 # Setup
 ```
 python -m pip install qsharp azure-quantum
+python -m pip install ipykernel ipympl jupyterlab
 ```
 
 # RandomNum

@@ -23,7 +23,7 @@ n_shots = 100
 
 # maxiter = 2000
 # maxiter = 1000
-maxiter = 100
+maxiter = 300
 #maxiter = 2
 
 def _predict_inner(
@@ -64,6 +64,8 @@ iter = 0
 
 def callback(xk):
     global iter
+    if iter % 10 == 0:
+        print("callback {}: xk={}".format(iter, xk))
     # print("callback {}: xk={}".format(iter, xk))
     iter += 1
 
