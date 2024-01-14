@@ -16,57 +16,30 @@ qsharp.init(project_root = './QCLRegressor')
 
 n_qubit = 4
 depth = 2
-param_size = 96
+param_size = 32
 seed = 0
-#n_shots = 1000
-n_shots = 10
+n_shots = 100
+#n_shots = 10
 
-
-# def create_farhi_neven_ansatz(
-#     n_qubit: int, c_depth: int, seed: Optional[int] = 0
-# ) -> UnboundParametricQuantumCircuit:
-#     circuit = UnboundParametricQuantumCircuit(n_qubit)
-#     zyu = list(range(n_qubit))
-#     rng = default_rng(seed)
-#     for _ in range(c_depth):
-#         rng.shuffle(zyu)
-#         for i in range(0, n_qubit - 1, 2):
-#             circuit.add_CNOT_gate(zyu[i + 1], zyu[i])
-#             circuit.add_ParametricRX_gate(zyu[i])
-#             circuit.add_ParametricRY_gate(zyu[i])
-#             circuit.add_CNOT_gate(zyu[i + 1], zyu[i])
-#             circuit.add_ParametricRY_gate(zyu[i])
-#             circuit.add_ParametricRX_gate(zyu[i])
-#     return circuit
-
+# maxiter = 2000
+# maxiter = 1000
+maxiter = 100
+#maxiter = 2
 
 def _predict_inner(
     x_scaled: NDArray[np.float_], theta: List[float]
 ) -> NDArray[np.float_]:
     res = []
     for x in x_scaled:
-        # TODO: call Q# code
-        # circuit = UnboundParametricQuantumCircuit(n_qubit)
-
-        # for i in range(n_qubit):
-        #     circuit.add_RY_gate(i, np.arcsin(x) * 2)
-        #     circuit.add_RZ_gate(i, np.arccos(x * x) * 2)
-
-        # bind_circuit = ansatz.bind_parameters(theta)
-        # circuit = circuit.combine(bind_circuit)
-        # circuit_state = GeneralCircuitQuantumState(n_qubit, circuit)
-        # observable = Operator(
-        #     {
-        #         pauli_label("Z0"): 2.0,
-        #     }
-        # )
-        # v = estimator([observable], [circuit_state])[0].value.real
-        # res.append(v)
+        # qsharpをshotで呼び出してもよいが遅いので、qsharp側でループ回す
+        # x_scaledごとqsharpで実行する方がよいかもしれない
         theta_str = ", ".join([str(t) for t in theta])
         theta_str = f"[{theta_str}]"
-        result = qsharp.run(f"QCL.Predict({n_qubit}, {depth}, {x}, {theta_str})", shots=n_shots)
-        print("result", result)
-        #res.append(result / n_shots)
+        result = qsharp.run(f"QCL.Predict({n_qubit}, {depth}, {n_shots}, {x}, {theta_str})", shots=1)
+        #print("result:", result)
+        result_value = result[0][0] / n_shots
+        #print("result_value:", result_value)
+        res.append(result_value)
 
     return np.array(res)
 
@@ -149,10 +122,6 @@ x_train, y_train = generate_noisy_sine(x_min, x_max, num_x)
 x_test, y_test = generate_noisy_sine(x_min, x_max, num_x)
 
 
-# maxiter = 2000
-# maxiter = 1000
-#maxiter = 500
-maxiter = 2
 opt_loss, opt_params = fit(x_train, y_train, maxiter)
 print("trained parameters", opt_params)
 print("loss", opt_loss)

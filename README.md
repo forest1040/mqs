@@ -4,5 +4,8 @@
 ```
 python RandomNum/src/randomNum.py
 ```
-
+# QCLRegressor
+```
+python QCLRegressor/src/main.py
+```
 
